@@ -1,6 +1,10 @@
 import torch
 import math
 
+
+def calculate_max_iou(detection, boxes):
+    return max([calculate_iou(detection, box) for box in boxes])
+
 def calculate_iou(box1, box2, x1y1x2y2=False, GIoU=False, DIoU=False, CIoU=False, eps=1e-9): 
      # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4 
     box2 = box2.T 

@@ -9,28 +9,45 @@
         #    Write the detection to the new txt file
 
 from ultralytics import YOLO
-from config import Config
-from iou import calculate_iou
+from configuration import Configuration
+from iou import calculate_max_iou
 from input import get_images, get_image_name
 import os
+import torch
 
-def write_detection(img_url: str, detection: 'list[float]') -> None:
+def write_detection(img_url: str, detection: torch.tensor, class_) -> None:
+    tensor_2d_float = detection.float()
+    detection = tensor_2d_float.tolist()
+
     img_name = get_image_name(img_url)
     txt_url = os.path.join("boxes", img_name + ".txt")
-    with open(txt_url, "a") as f:
-        f.write("0 " + " ".join([str(x) for x in detection]) + "\n")
+    with open(txt_url, "r") as f:
+        lines = f.readlines()
+        lines.append(f"{class_} " + " ".join([str(x) for x in detection]) + "\n")
+    with open(txt_url, "w") as f:
+        f.writelines("".join(lines))
+        
 
 def main():
-    config = Config()
-    model = YOLO(config.model_config, config.weights)
+    print("starting...")
+    config = Configuration()
+    model = YOLO(config.weights)
     model.conf = 0.01  # Confidence threshold
+    print("model loaded...")
     for image in get_images():
+        print("image: ", image.img_url)
         detections = model(image.img_url)
-        for detection in detections.xyxy[0]:
-            box = detection[0:4]
-            iou = calculate_iou(box, image.bounding_boxes)
-            if iou < config.iou_threshold:
-                write_detection(image.img_url, detection)
+        for detection in detections:
+
+            boxes = detection.boxes.xyxyn
+            classes = detection.boxes.cls
+
+            for class_, box in zip(classes, boxes):
+                iou = calculate_max_iou(box, image.bounding_boxes)
+                print("iou: ", iou)
+                if iou < config.iou_threshold:
+                    print("writing the detection...")
+                    write_detection(image.img_url, box, class_)
 
 if __name__ == "__main__":
     main()
