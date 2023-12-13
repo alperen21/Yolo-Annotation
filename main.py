@@ -37,6 +37,7 @@ def main():
     for image in get_images():
         print("image: ", image.img_url)
         detections = model(image.img_url)
+        config.set_prediction_names(detections[0].names)
         for detection in detections:
 
             boxes = detection.boxes.xyxyn
@@ -44,7 +45,13 @@ def main():
 
             for class_, box in zip(classes, boxes):
                 iou = calculate_max_iou(box, image.bounding_boxes)
-                print("iou: ", iou)
+
+                if not config.is_prediction_included_celltypes(class_):
+                    print("predicted cell type is not included in the configurations")
+                    continue
+                else:
+                    print("predicted cell type is included in the configurations")
+
                 if iou < config.iou_threshold:
                     print("writing the detection...")
                     write_detection(image.img_url, box, class_)
