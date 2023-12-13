@@ -41,7 +41,7 @@ def main():
     print("starting...")
     config = Configuration()
     model = YOLO(config.weights)
-    model.conf = 0.01  # Confidence threshold
+    model.conf = config.confidence_threshold
     print("model loaded...")
     for image in get_images():
         print("image: ", image.img_url)

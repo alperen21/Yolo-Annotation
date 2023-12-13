@@ -5,6 +5,7 @@ class Configuration:
         self.iou_threshold = 0.9
         self.weights = os.path.join("model", "24_10_23_yolov8x_no_aug_iou_0.7.pt")
         self.cell_types = ["RBC", "WBC", "PLT"]
+        self.confidence_threshold = 0.01
     
     def set_prediction_names(self, names) -> None:
         self.name_to_idx_dict = dict()
