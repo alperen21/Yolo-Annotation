@@ -24,6 +24,10 @@ def write_detection(img_url: str, detection: torch.tensor, class_) -> None:
     with open(txt_url, "r") as f:
         lines = f.readlines()
         lines.append(f"{class_} " + " ".join([str(x) for x in detection]) + "\n")
+    for idx, line in enumerate(lines):
+        line = line.strip()
+        line += "\n"
+        lines[idx] = line
     with open(txt_url, "w") as f:
         f.writelines("".join(lines))
         
@@ -36,7 +40,7 @@ def main():
     print("model loaded...")
     for image in get_images():
         print("image: ", image.img_url)
-        detections = model(image.img_url)
+        detections = model(image.img_url, save=True)
         config.set_prediction_names(detections[0].names)
         for detection in detections:
 
