@@ -28,8 +28,13 @@ def write_detection(img_url: str, detection: torch.tensor, class_) -> None:
         line = line.strip()
         line += "\n"
         lines[idx] = line
+    
+    new_lines = []
+    for line in lines:
+        if len(line) > 3:
+            new_lines.append(line)
     with open(txt_url, "w") as f:
-        f.writelines("".join(lines))
+        f.writelines("".join(new_lines))
         
 
 def main():
